@@ -82,11 +82,219 @@ st.set_page_config(
     layout="centered",
 )
 
-st.title("🎓 Tutor Metacognitivo")
-st.caption(
-    "Un espacio para planear, monitorear y reflexionar sobre tu aprendizaje"
+# ---------------------------------------------------------
+# Estilos visuales del prototipo
+# ---------------------------------------------------------
+
+st.markdown(
+    """
+    <style>
+    /* ---------- Base general ---------- */
+
+    .stApp {
+        background:
+            radial-gradient(
+                circle at top right,
+                rgba(99, 102, 241, 0.08),
+                transparent 28rem
+            ),
+            #f8fafc;
+    }
+
+    .block-container {
+        max-width: 980px;
+        padding-top: 2.5rem;
+        padding-bottom: 4rem;
+    }
+
+    /* ---------- Tipografía ---------- */
+
+    h1, h2, h3 {
+        color: #172554;
+        letter-spacing: -0.02em;
+    }
+
+    p {
+        line-height: 1.65;
+    }
+
+    /* ---------- Botones ---------- */
+
+    .stButton > button {
+        border-radius: 10px;
+        min-height: 42px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .stButton > button:hover {
+        transform: translateY(-1px);
+        border-color: #4f46e5;
+    }
+
+    /* ---------- Inputs ---------- */
+
+    div[data-baseweb="select"] > div,
+    .stTextInput input {
+        border-radius: 10px;
+    }
+
+    /* ---------- Sidebar ---------- */
+
+    section[data-testid="stSidebar"] {
+        background: #f1f5f9;
+        border-right: 1px solid #e2e8f0;
+    }
+
+    section[data-testid="stSidebar"] > div {
+        padding-top: 1.5rem;
+    }
+
+    /* ---------- Chat ---------- */
+
+    div[data-testid="stChatMessage"] {
+        border-radius: 14px;
+        padding: 0.5rem 0.75rem;
+        margin-bottom: 0.65rem;
+    }
+
+    /* ---------- Métricas ---------- */
+
+    div[data-testid="stMetric"] {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 1rem;
+    }
+
+    /* ---------- Alertas ---------- */
+
+    div[data-testid="stAlert"] {
+        border-radius: 12px;
+    }
+    /* ---------- Encabezado del Tutor ---------- */
+
+    .tutor-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: linear-gradient(
+            135deg,
+            #172554 0%,
+            #312e81 100%
+        );
+        padding: 1.5rem 1.7rem;
+        border-radius: 18px;
+        margin-bottom: 2rem;
+        box-shadow: 0 8px 24px rgba(30, 41, 59, 0.10);
+    }
+
+    .tutor-header-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 58px;
+        height: 58px;
+        min-width: 58px;
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 16px;
+        font-size: 2rem;
+    }
+
+    .tutor-header-title {
+        color: white;
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1.15;
+    }
+
+    .tutor-header-subtitle {
+        color: #cbd5e1;
+        margin-top: 0.35rem;
+        font-size: 0.95rem;
+    }
+    /* ---------- Conversación ---------- */
+
+    .conversation-header {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.8rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .conversation-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        border-radius: 10px;
+        background: #eef2ff;
+        font-size: 1.1rem;
+    }
+
+    .conversation-title {
+        color: #172554;
+        font-size: 1.05rem;
+        font-weight: 700;
+    }
+
+    .conversation-subtitle {
+        color: #64748b;
+        font-size: 0.82rem;
+        margin-top: 0.1rem;
+    }
+    /* ---------- Contenido del sidebar ---------- */
+
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {
+        color: #172554;
+    }
+
+    section[data-testid="stSidebar"] div[data-testid="stMetric"] {
+        background: rgba(255, 255, 255, 0.65);
+        border: 1px solid #e2e8f0;
+        box-shadow: none;
+    }
+
+    section[data-testid="stSidebar"] .stButton > button {
+        width: 100%;
+        background: white;
+        border: 1px solid #cbd5e1;
+    }
+
+    section[data-testid="stSidebar"] .stButton > button:hover {
+        border-color: #4f46e5;
+        color: #3730a3;
+        background: #f8fafc;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
 )
 
+st.markdown(
+    """
+    <div class="tutor-header">
+        <div class="tutor-header-icon">🎓</div>
+        <div>
+            <div class="tutor-header-title">
+                Tutor Metacognitivo
+            </div>
+            <div class="tutor-header-subtitle">
+                Acompañamiento para planear, monitorear y
+                reflexionar sobre tu aprendizaje
+            </div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 
 # ---------------------------------------------------------
@@ -212,127 +420,131 @@ if (
     "participant_id" not in st.session_state
     and st.session_state.identified_participant_id is None
 ):
-    st.subheader(
-        "Identificación del participante"
+    identification_card = st.container(
+        border=True
     )
-
-    st.write(
-        "Para acceder a tu historial en futuras sesiones, "
-        "puedes generar un nuevo código de participante o "
-        "utilizar uno que hayas recibido anteriormente."
-    )
-
-    access_mode = st.radio(
-        "Selecciona una opción:",
-        (
-            "Nuevo participante",
-            "Ya tengo un código",
-        ),
-        key="participant_access_mode",
-    )
-
-    # -----------------------------------------------------
-    # Nuevo participante
-    # -----------------------------------------------------
-
-    if access_mode == "Nuevo participante":
-
-        if (
-            "pending_participant_id"
-            not in st.session_state
-        ):
-
-            if st.button(
-                "Generar código de participante"
-            ):
-
-                st.session_state[
-                    "pending_participant_id"
-                ] = create_participant()
-
-                st.rerun()
-
-        else:
-
-            participant_code = (
-                st.session_state[
-                    "pending_participant_id"
-                ]
-            )
-
-            st.success(
-                "Tu código de participante "
-                "ha sido generado."
-            )
-
-            st.code(
-                participant_code,
-                language=None,
-            )
-
-            st.warning(
-                "Guarda este código. Lo necesitarás "
-                "para acceder a tu historial "
-                "en futuras sesiones."
-            )
-
-            if st.button(
-                "Continuar"
-            ):
-
-                st.session_state.identified_participant_id = (
-                    participant_code
-                )
-
-               
-                del st.session_state[
-                    "pending_participant_id"
-                ]
-
-                st.rerun()
-
-    # -----------------------------------------------------
-    # Participante existente
-    # -----------------------------------------------------
-
-    else:
-
-        participant_code = st.text_input(
-            "Código de participante",
-            placeholder="P-xxxxxxxx",
+    with identification_card:
+        st.subheader(
+            "Identificación del participante"
         )
 
-        if st.button(
-            "Continuar con este código"
-        ):
+        st.write(
+            "Para acceder a tu historial en futuras sesiones, "
+            "puedes generar un nuevo código de participante o "
+            "utilizar uno que hayas recibido anteriormente."
+        )
 
-            participant_code = (
-                participant_code.strip()
-            )
+        access_mode = st.radio(
+            "Selecciona una opción:",
+            (
+                "Nuevo participante",
+                "Ya tengo un código",
+            ),
+            key="participant_access_mode",
+        )
 
-            if not participant_code:
-                st.error(
-                    "Ingresa tu código de particpante"
-                )
-                
-            elif participant_exists(
-                participant_code
+        # -----------------------------------------------------
+        # Nuevo participante
+        # -----------------------------------------------------
+
+        if access_mode == "Nuevo participante":
+
+            if (
+                "pending_participant_id"
+                not in st.session_state
             ):
-                st.session_state.identified_participant_id = (
-                    participant_code
-                )
-                
 
-                st.rerun()
+                if st.button(
+                    "Generar código de participante"
+                ):
+
+                    st.session_state[
+                        "pending_participant_id"
+                    ] = create_participant()
+
+                    st.rerun()
 
             else:
 
-                st.error(
-                    "El código de participante "
-                    "no existe."
+                participant_code = (
+                    st.session_state[
+                        "pending_participant_id"
+                    ]
                 )
 
-    st.stop()
+                st.success(
+                    "Tu código de participante "
+                    "ha sido generado."
+                )
+
+                st.code(
+                    participant_code,
+                    language=None,
+                )
+
+                st.warning(
+                    "Guarda este código. Lo necesitarás "
+                    "para acceder a tu historial "
+                    "en futuras sesiones."
+                )
+
+                if st.button(
+                    "Continuar"
+                ):
+
+                    st.session_state.identified_participant_id = (
+                        participant_code
+                    )
+
+                
+                    del st.session_state[
+                        "pending_participant_id"
+                    ]
+
+                    st.rerun()
+
+        # -----------------------------------------------------
+        # Participante existente
+        # -----------------------------------------------------
+
+        else:
+
+            participant_code = st.text_input(
+                "Código de participante",
+                placeholder="P-xxxxxxxx",
+            )
+
+            if st.button(
+                "Continuar con este código"
+            ):
+
+                participant_code = (
+                    participant_code.strip()
+                )
+
+                if not participant_code:
+                    st.error(
+                        "Ingresa tu código de particpante"
+                    )
+                    
+                elif participant_exists(
+                    participant_code
+                ):
+                    st.session_state.identified_participant_id = (
+                        participant_code
+                    )
+                    
+
+                    st.rerun()
+
+                else:
+
+                    st.error(
+                        "El código de participante "
+                        "no existe."
+                    )
+
+        st.stop()
 
 # =====================================================
 # VERIFICACIÓN DEL CONSENTIMIENTO
@@ -508,15 +720,48 @@ if st.session_state.selected_activity_id != selected_activity_id:
     st.session_state.selected_activity_id = selected_activity_id
 current_activity = get_activity(selected_activity_id)
 
-st.markdown(
-    f"""
+activity_card = st.container(
+    border=True
+)
+
+with activity_card:
+
+    st.markdown(
+        f"""
+        <div class="activity-label">
+            ACTIVIDAD ACTUAL
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        f"""
 ### 📘 {current_activity["title"]}
 
-**Tema:** {current_activity["topic"]}  
+**Tema:** {current_activity["topic"]} &nbsp;&nbsp; • &nbsp;&nbsp;
 **Lenguaje:** {current_activity["programming_language"]}
 
 {current_activity["statement"]}
 """
+    )
+
+
+st.markdown(
+    """
+    <div class="conversation-header">
+        <div class="conversation-icon">💬</div>
+        <div>
+            <div class="conversation-title">
+                Conversación con tu tutor
+            </div>
+            <div class="conversation-subtitle">
+                Explica tu razonamiento, dudas y decisiones durante la actividad.
+            </div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
 # ---------------------------------------------------------
 # Mostrar historial conversacional
@@ -1019,7 +1264,7 @@ with st.sidebar:
     #st.divider()
     
     st.subheader(
-        "Mi Sesión"
+        " 🎓Mi Sesión"
             )
     st.caption(
         "Información de tu sesión actual"
@@ -1154,7 +1399,7 @@ with st.sidebar:
     if session_status == "active":
 
         if st.button(
-            "🛑 Finalizar sesión",
+            "⏹️ Finalizar sesión",
             use_container_width=True,
         ):
 
