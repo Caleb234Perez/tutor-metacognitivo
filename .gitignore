@@ -1,0 +1,30 @@
+# Entorno virtual
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Datos generados por el prototipo
+data/
+
+# Bases de datos
+*.db
+*.sqlite
+*.sqlite3
+
+# Variables de entorno / secretos
+.env
+.env.*
+
+# Archivos temporales
+*.log
+*.tmp
+
+# VS Code
+.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
