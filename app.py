@@ -64,6 +64,8 @@ from services.database_service import (
     save_technical_event,
     save_participant_consent,
     has_valid_consent,
+    mark_activity_completed,
+    get_completed_activities,
 )
 
 # -----------------------------------------------------
@@ -302,6 +304,8 @@ st.markdown(
 # ---------------------------------------------------------
 
 def start_new_session():
+    st.session_state.session_difficulty_count = 0
+    st.session_state.session_final_phase = "planning"
 
     st.session_state.session_id = str(
         uuid.uuid4()
@@ -416,6 +420,7 @@ if "confirm_end_session" not in st.session_state:
 # ---------------------------------------------------------
 # Identificación del participante
 # ---------------------------------------------------------
+
 if (
     "participant_id" not in st.session_state
     and st.session_state.identified_participant_id is None
@@ -423,128 +428,56 @@ if (
     identification_card = st.container(
         border=True
     )
+
     with identification_card:
+
         st.subheader(
             "Identificación del participante"
         )
 
         st.write(
-            "Para acceder a tu historial en futuras sesiones, "
-            "puedes generar un nuevo código de participante o "
-            "utilizar uno que hayas recibido anteriormente."
+            "Ingresa tu ID institucional para acceder "
+            "al Tutor Metacognitivo. Este identificador "
+            "permitirá recuperar tu progreso en futuras sesiones."
         )
 
-        access_mode = st.radio(
-            "Selecciona una opción:",
-            (
-                "Nuevo participante",
-                "Ya tengo un código",
-            ),
-            key="participant_access_mode",
+        institutional_id = st.text_input(
+            "ID institucional",
+            placeholder="Ingresa tu ID institucional",
         )
 
-        # -----------------------------------------------------
-        # Nuevo participante
-        # -----------------------------------------------------
+        if st.button(
+            "Continuar",
+            type="primary",
+            use_container_width=True,
+        ):
 
-        if access_mode == "Nuevo participante":
+            institutional_id = (
+                institutional_id.strip()
+            )
 
-            if (
-                "pending_participant_id"
-                not in st.session_state
-            ):
+            if not institutional_id:
 
-                if st.button(
-                    "Generar código de participante"
-                ):
-
-                    st.session_state[
-                        "pending_participant_id"
-                    ] = create_participant()
-
-                    st.rerun()
+                st.error(
+                    "Ingresa tu ID institucional para continuar."
+                )
 
             else:
 
-                participant_code = (
-                    st.session_state[
-                        "pending_participant_id"
-                    ]
-                )
-
-                st.success(
-                    "Tu código de participante "
-                    "ha sido generado."
-                )
-
-                st.code(
-                    participant_code,
-                    language=None,
-                )
-
-                st.warning(
-                    "Guarda este código. Lo necesitarás "
-                    "para acceder a tu historial "
-                    "en futuras sesiones."
-                )
-
-                if st.button(
-                    "Continuar"
+                if not participant_exists(
+                    institutional_id
                 ):
-
-                    st.session_state.identified_participant_id = (
-                        participant_code
+                    create_participant(
+                        institutional_id
                     )
 
-                
-                    del st.session_state[
-                        "pending_participant_id"
-                    ]
-
-                    st.rerun()
-
-        # -----------------------------------------------------
-        # Participante existente
-        # -----------------------------------------------------
-
-        else:
-
-            participant_code = st.text_input(
-                "Código de participante",
-                placeholder="P-xxxxxxxx",
-            )
-
-            if st.button(
-                "Continuar con este código"
-            ):
-
-                participant_code = (
-                    participant_code.strip()
+                st.session_state.identified_participant_id = (
+                    institutional_id
                 )
 
-                if not participant_code:
-                    st.error(
-                        "Ingresa tu código de particpante"
-                    )
-                    
-                elif participant_exists(
-                    participant_code
-                ):
-                    st.session_state.identified_participant_id = (
-                        participant_code
-                    )
-                    
+                st.rerun()
 
-                    st.rerun()
-
-                else:
-
-                    st.error(
-                        "El código de participante "
-                        "no existe."
-                    )
-
-        st.stop()
+    st.stop()
 
 # =====================================================
 # VERIFICACIÓN DEL CONSENTIMIENTO
@@ -600,13 +533,13 @@ durante las actividades.
 
 ### Confidencialidad
 
-Para el funcionamiento del prototipo se utilizará un **código de
-participante** en lugar de tu nombre dentro de los registros del
-sistema.
+Para identificar tu participación y permitir el seguimiento de tu
+progreso entre sesiones, el sistema utilizará tu **ID institucional**.
 
-La información recopilada será utilizada exclusivamente con fines
-académicos y de investigación. Los resultados del estudio serán
-presentados de manera agregada.
+Este identificador y la información generada durante tu participación
+serán utilizados exclusivamente con fines académicos y de investigación.
+Los resultados del estudio serán presentados de manera agregada, sin
+mostrar tu ID institucional de forma pública.
 
 ### Participación voluntaria
 
@@ -673,8 +606,29 @@ if "session_id" not in st.session_state:
 # SELECCIÓN DE ACTIVIDAD
 # =========================================================
 
-available_activities = get_available_activities()
+all_activities = get_available_activities()
+completed_activity_ids = get_completed_activities(
+    st.session_state.participant_id
+)
+available_activities = [
+    activity
+    for activity in all_activities
+    if activity["activity_id"]
+    not in completed_activity_ids
+]
 
+
+if not available_activities:
+
+    st.success(
+        "Has completado todas las actividades disponibles."
+    )
+
+    st.info(
+        "Puedes finalizar tu sesión cuando lo desees."
+    )
+
+    st.stop()
 activity_options = {
     activity["title"]: activity["activity_id"]
     for activity in available_activities
@@ -887,6 +841,13 @@ if user_message:
     detected_event = (
         classification_result["event"]
     )
+    # Normalizar el evento durante la reflexión
+    #if phase_before == "reflection":
+     #   if detected_event not in (
+      #      "strategy_reflection",
+       #     "transfer_reflection",
+        #):
+         #   detected_event = "reflection_response"
 
     if not classification_success:
         st.session_state.pedagogical_state =(
@@ -925,7 +886,9 @@ if user_message:
                 
     st.session_state.last_pedagogical_event = (
         detected_event
-    )            
+    )      
+    if detected_event == "difficulty_detected":
+        st.session_state.session_difficulty_count += 1      
     # -----------------------------------------------------
     # Procesar evento
     # -----------------------------------------------------
@@ -947,6 +910,7 @@ if user_message:
     current_phase = get_current_phase(
         st.session_state.pedagogical_state
     )
+    st.session_state.session_final_phase = current_phase
 
     scaffolding_level = (
         get_scaffolding_level(
@@ -974,6 +938,16 @@ if user_message:
     )
     if reflection_completed:
         st.session_state.activity_completed_cycle = True
+        mark_activity_completed(
+            participant_id=(
+                st.session_state.participant_id
+            ),
+            activity_id=(
+                current_activity["activity_id"]
+            ),
+        )
+
+
     if DEBUG_MODE:
         print(
             "DEBUG REFLECTION:",
@@ -1204,6 +1178,8 @@ if user_message:
         st.markdown(
             tutor_response
         )
+    if reflection_completed:
+        st.rerun()
 
 
 # ---------------------------------------------------------
@@ -1268,6 +1244,27 @@ with st.sidebar:
             )
     st.caption(
         "Información de tu sesión actual"
+    )
+        # -----------------------------------------------------
+    # Progreso de actividades
+    # -----------------------------------------------------
+
+    completed_count = len(completed_activity_ids)
+    total_activities = len(all_activities)
+
+    progress_value = (
+        completed_count / total_activities
+        if total_activities > 0
+        else 0
+    )
+
+    st.markdown("#### 📚 Progreso de actividades")
+
+    st.progress(progress_value)
+
+    st.caption(
+        f"{completed_count} de {total_activities} "
+        "actividades completadas"
     )
     session_status = (
         st.session_state.session_data[
@@ -1379,7 +1376,7 @@ with st.sidebar:
         )
     
     st.write(
-        "Código de participante:"
+        "ID institucional:"
     )
     
     st.code(
@@ -1387,8 +1384,8 @@ with st.sidebar:
         language=None,
     )
     st.caption(
-        "Conserva este código para acceder a tu "
-        "historial en futuras sesiones."
+        "Tu ID institucional permite recuperar tu "
+        "progreso en futuras sesiones."
     )
 
 
@@ -1499,14 +1496,10 @@ with st.sidebar:
                             ]
                         ),
                         difficulty_count=(
-                            st.session_state.pedagogical_state[
-                                "difficulty_count"
-                            ]
+                            st.session_state.session_difficulty_count
                         ),
                         final_phase=(
-                            st.session_state.pedagogical_state[
-                                "phase"
-                            ]
+                            st.session_state.session_final_phase
                         ),
                     )
 
@@ -1520,14 +1513,10 @@ with st.sidebar:
                             ]
                         ),
                         difficulty_count=(
-                            st.session_state.pedagogical_state[
-                                "difficulty_count"
-                            ]
+                            st.session_state.session_difficulty_count
                         ),
                         final_phase=(
-                            st.session_state.pedagogical_state[
-                                "phase"
-                            ]
+                            st.session_state.session_final_phase
                         ),
                     )
 

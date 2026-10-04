@@ -1,13 +1,26 @@
-from ollama import chat
+import os
+import requests
+from dotenv import load_dotenv
 
 
-MODEL_NAME = "llama3.2:3b"
+load_dotenv()
+
+
+MODEL_NAME = "@cf/meta/llama-3.2-3b-instruct"
+
+CLOUDFLARE_API_TOKEN = os.getenv(
+    "CLOUDFLARE_API_TOKEN"
+)
+
+CLOUDFLARE_ACCOUNT_ID = os.getenv(
+    "CLOUDFLARE_ACCOUNT_ID"
+)
 
 
 def generate_response(messages, system_prompt):
     """
-    Genera una respuesta utilizando el modelo local
-    ejecutado mediante Ollama.
+    Genera una respuesta utilizando
+    Llama 3.2 3B Instruct mediante Cloudflare Workers AI.
 
     Devuelve un diccionario con:
     - success: indica si la generación fue correcta.
@@ -24,6 +37,16 @@ def generate_response(messages, system_prompt):
             "messages debe ser una lista."
         )
 
+    if not CLOUDFLARE_API_TOKEN:
+        raise RuntimeError(
+            "No se encontró CLOUDFLARE_API_TOKEN."
+        )
+
+    if not CLOUDFLARE_ACCOUNT_ID:
+        raise RuntimeError(
+            "No se encontró CLOUDFLARE_ACCOUNT_ID."
+        )
+
     messages_for_model = [
         {
             "role": "system",
@@ -33,19 +56,43 @@ def generate_response(messages, system_prompt):
 
     messages_for_model.extend(messages)
 
+    url = (
+        "https://api.cloudflare.com/client/v4/accounts/"
+        f"{CLOUDFLARE_ACCOUNT_ID}/ai/run/{MODEL_NAME}"
+    )
+
+    headers = {
+        "Authorization": (
+            f"Bearer {CLOUDFLARE_API_TOKEN}"
+        ),
+        "Content-Type": "application/json",
+    }
+
+    payload = {
+        "messages": messages_for_model
+    }
+
     try:
-        response = chat(
-            model=MODEL_NAME,
-            messages=messages_for_model,
+        response = requests.post(
+            url,
+            headers=headers,
+            json=payload,
+            timeout=60,
         )
 
-        if (
-            response is None
-            or response.message is None
-            or not response.message.content
-        ):
+        response.raise_for_status()
+
+        response_data = response.json()
+
+        content = (
+            response_data
+            .get("result", {})
+            .get("response")
+        )
+
+        if not content:
             print(
-                "[ERROR OLLAMA] "
+                "[ERROR CLOUDFLARE] "
                 "El modelo no devolvió una respuesta válida."
             )
 
@@ -57,19 +104,19 @@ def generate_response(messages, system_prompt):
                     "momentos."
                 ),
                 "error_type": "empty_response",
-                "error_message":(
-                    "El generador no devolvio contenido"
+                "error_message": (
+                    "El generador no devolvió contenido"
                 ),
             }
 
         return {
             "success": True,
-            "content": response.message.content,
+            "content": content,
         }
 
     except Exception as error:
         print(
-            "[ERROR OLLAMA] "
+            "[ERROR CLOUDFLARE] "
             f"No fue posible generar la respuesta: {error}"
         )
 
@@ -80,6 +127,6 @@ def generate_response(messages, system_prompt):
                 "orientación. Intenta nuevamente en unos "
                 "momentos."
             ),
-            "error_type":"generation_error",
+            "error_type": "generation_error",
             "error_message": str(error),
         }
