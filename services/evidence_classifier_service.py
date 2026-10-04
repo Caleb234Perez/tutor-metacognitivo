@@ -1,7 +1,4 @@
-from ollama import chat
-
-
-MODEL_NAME = "mistral:7b"
+from services.ollama_service import generate_response
 
 VALID_EVENTS = (
     "plan_ready",
@@ -200,18 +197,19 @@ def classify_pedagogical_evidence(message):
 
     try:
 
-        response = chat(
-            model=MODEL_NAME,
-            messages=messages,
-            options={
-                "temperature": 0,
-            },
+        response = generate_response(
+            messages=[
+                {
+                    "role": "user",
+                    "content": classification_request,
+                }
+            ],
+            system_prompt=CLASSIFIER_PROMPT,
         )
-
         if (
-            response is None
-            or response.message is None
-            or not response.message.content
+            not response
+            or not response.get("success")
+            or not response.get("content")
         ):
 
             print(
@@ -230,11 +228,11 @@ def classify_pedagogical_evidence(message):
 
         print(
             "\n[DEBUG CLASSIFIER RAW]:",
-            repr(response.message.content),
+            repr(response["content"]),
         )
 
         result = (
-            response.message.content
+            response["content"]
             .strip()
             .lower()
         )
