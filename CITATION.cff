@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "Si utiliza este desarrollo tecnológico o software en su investigación, por favor cítelo utilizando los siguientes metadatos."
+
+authors:
+  - family-names: "Pérez Estrada"
+    given-names: "Emmanuel Caleb"
+    affiliation: "Universidad Autónoma de Aguascalientes"
+
+title: "Prototipo de tutor metacognitivo basado en Inteligencia Artificial Generativa (IAG) y Analítica de Aprendizaje para facilitar la autorregulación del aprendizaje en estudiantes universitarios"
+
+version: "1.0.0"
+
+url: "https://github.com/Caleb234Perez/tutor-metacognitivo"
+
+keywords:
+  - "Tutor metacognitivo"
+  - "Inteligencia Artificial Generativa"
+  - "Analítica de Aprendizaje"
+  - "Autorregulación del aprendizaje"
+  - "Tesis de Maestría"
