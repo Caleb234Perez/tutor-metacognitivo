@@ -5,10 +5,16 @@ authors:
   - family-names: "Pérez Estrada"
     given-names: "Emmanuel Caleb"
     affiliation: "Universidad Autónoma de Aguascalientes"
+ - family-names: "Muñoz Andrade"
+    given-names: "Estela Lizbeth"
+    role: Directora de Tesis
+    affiliation: "Universidad Autónoma de Aguascalientes"
+    orcid: https://orcid.org/0000-0003-4182-5044
 
 title: "Prototipo de tutor metacognitivo basado en Inteligencia Artificial Generativa (IAG) y Analítica de Aprendizaje para facilitar la autorregulación del aprendizaje en estudiantes universitarios"
 
 version: "1.0.0"
+date-released: "2026-10-28" # Cambiar por la fecha de publicación o examen de grado 
 
 url: "https://github.com/Caleb234Perez/tutor-metacognitivo"
 
