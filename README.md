@@ -7,9 +7,9 @@ Institución: Universidad Autónoma de Aguascalientes
 Alumno: Emmanuel Caleb Pérez Estrada
 GitHub: @Caleb234Perez
 
-Dirección y Tutoría de Tesis (Acreditación SNII)
+Dirección y Tutoría de Tesis 
 
 Directora de Tesis: Dra. Estela Lizbeth Muñoz Andrade
 Perfil Oficial de GitHub: @elmunoz
-Adscripción: [Departamento de adscripción]
-Línea de Investigación: [LGAC relacionada con el proyecto]
+Adscripción: Universidad Autónoma de Aguascalientes, Departamento de Sistemas Electrónicos
+Línea de Investigación:  Diseño y desarrollo de software educativo, Inteligencia Artificial Generativa aplicada a la Educación y Enseñanza.
