@@ -1,4 +1,4 @@
-Prototipo de tutor metacognitivo basado en Inteligencia Artificial Generativa (IAG) y Analítica de Aprendizaje para facilitar la autorregulación del aprendizaje en estudiantes universitarios
+Tutor metacognitivo basado en Inteligencia Artificial Generativa (IAG) y Analítica de Aprendizaje para facilitar la autorregulación del aprendizaje en estudiantes universitarios
 
 Información Académica e Institucional
 
